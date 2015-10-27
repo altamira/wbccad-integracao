@@ -67,8 +67,8 @@ public class OrcMatController {
 	@Autowired
 	private OrcDetRepository orcDetRepository;
 
-	@JmsListener(destination = "wbccad-integracao-orccab")
-	@SendTo("wbccad-integracao-orccab-dump")
+	@JmsListener(destination = "WBCCAD-INTEGRACAO-ORCCAB")
+	@SendTo("WBCCAD-INTEGRACAO-ORCCAB-DUMP")
 	public IntegracaoOrccab integracaoOrccab(String orcamento) {
 		IntegracaoOrccab orccab = integracaoOrccabRepository
 				.findByOrcnum(orcamento);
@@ -117,7 +117,7 @@ public class OrcMatController {
 		return list;
 	}
 
-	@JmsListener(destination = "wbccad-integracao-orccab-dump")
+	@JmsListener(destination = "WBCCAD-INTEGRACAO-ORCCAB-DUMP")
 	public void printIntegracao(IntegracaoOrccab orccab) {
 		System.out
 				.println(String.format("\n Processing %s", orccab.getOrcnum()));
@@ -136,8 +136,8 @@ public class OrcMatController {
 
 	}
 
-	@JmsListener(destination = "wbccad-orccab")
-	@SendTo("wbccad-orccab-dump")
+	@JmsListener(destination = "WBCCAD-ORCCAB")
+	@SendTo("WBCCAD-ORCCAB-DUMP")
 	public Orccab orccab(String orcamento) {
 		System.out.println(String.format("\n--> Receive message %s...",
 				orcamento));
@@ -191,12 +191,12 @@ public class OrcMatController {
 		return orccab;
 	}
 
-	@JmsListener(destination = "wbccad-prdorc")
-	//@SendTo("wbccad-prdorc-dump")
-	@SendTo("import-material")
+	@JmsListener(destination = "WBCCAD-PRDORC")
+	// @SendTo("wbccad-prdorc-dump")
+	@SendTo("IMPORT-MATERIAL")
 	public Prdorc prdorc(String codigo) {
 		System.out.println(String.format("\n Processing Prdorc %s", codigo));
-		
+
 		Prdorc prdorc = prdorcRepository.findByProduto(codigo);
 		if (prdorc != null) {
 			prdorc.setPrdest(Prdest(prdorc));
@@ -219,7 +219,7 @@ public class OrcMatController {
 		return list;
 	}
 
-	@JmsListener(destination = "wbccad-orccab-dump")
+	@JmsListener(destination = "WBCCAD-ORCCAB-DUMP")
 	public void receiveList(Orccab orccab) {
 
 		System.out
@@ -255,13 +255,25 @@ public class OrcMatController {
 
 	}
 
-	@JmsListener(destination = "wbccad-prdorc-dump")
+	@JmsListener(destination = "WBCCAD-PRDORC-DUMP")
+	public void prdorcPrint(String codigo) {
+		System.out.println(String.format("\n Processing Prdorc %s", codigo));
+
+		Prdorc prdorc = prdorcRepository.findByProduto(codigo);
+		if (prdorc != null) {
+			prdorc.setPrdest(Prdest(prdorc));
+		}
+
+		printPrdorc(prdorc);
+	}
+
 	private void printPrdorc(Prdorc produtopai) {
+
 		if (produtopai == null) {
-			System.out.println(String.format("Produto nao encontrado"));	
+			System.out.println(String.format("Produto nao encontrado"));
 			return;
 		}
-		
+
 		System.out.println(String.format("%s %s %s [%s]", "  +",
 				produtopai.getProduto(), produtopai.getDescricao(),
 				produtopai.getCor_padrao()));

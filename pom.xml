@@ -15,13 +15,13 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>1.2.6.RELEASE</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath />
 	</parent>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
-		<start-class>xpadro.spring.jms.JmsJavaconfigApplication</start-class>
+		<start-class>br.com.altamira.data.wbccad.Application</start-class>
 		<amq.version>5.4.2</amq.version>
 	</properties>
 
