@@ -2,10 +2,7 @@ package br.com.altamira.data.wbccad.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import org.apache.activemq.kaha.impl.data.Item;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -31,8 +28,6 @@ import br.com.altamira.data.wbccad.repository.OrccabRepository;
 import br.com.altamira.data.wbccad.repository.OrcitmRepository;
 import br.com.altamira.data.wbccad.repository.PrdestRepository;
 import br.com.altamira.data.wbccad.repository.PrdorcRepository;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Controller
 public class OrcMatController {
@@ -67,8 +62,8 @@ public class OrcMatController {
 	@Autowired
 	private OrcDetRepository orcDetRepository;
 
-	@JmsListener(destination = "WBCCAD-INTEGRACAO-ORCCAB")
-	@SendTo("WBCCAD-INTEGRACAO-ORCCAB-DUMP")
+	@JmsListener(destination = "WBCCAD-INTEGRACAO-ORCCAB-VISUALIZAR")
+	@SendTo("WBCCAD-INTEGRACAO-ORCCAB-IMPRIMIR")
 	public IntegracaoOrccab integracaoOrccab(String orcamento) {
 		IntegracaoOrccab orccab = integracaoOrccabRepository
 				.findByOrcnum(orcamento);
@@ -117,7 +112,7 @@ public class OrcMatController {
 		return list;
 	}
 
-	@JmsListener(destination = "WBCCAD-INTEGRACAO-ORCCAB-DUMP")
+	@JmsListener(destination = "WBCCAD-INTEGRACAO-ORCCAB-IMPRIMIR")
 	public void printIntegracao(IntegracaoOrccab orccab) {
 		System.out
 				.println(String.format("\n Processing %s", orccab.getOrcnum()));
@@ -136,8 +131,8 @@ public class OrcMatController {
 
 	}
 
-	@JmsListener(destination = "WBCCAD-ORCCAB")
-	@SendTo("WBCCAD-ORCCAB-DUMP")
+	@JmsListener(destination = "WBCCAD-ORCAMENTO-VISUALIZAR")
+	@SendTo("WBCCAD-ORCAMENTO-IMPRIMIR")
 	public Orccab orccab(String orcamento) {
 		System.out.println(String.format("\n--> Receive message %s...",
 				orcamento));
@@ -191,11 +186,11 @@ public class OrcMatController {
 		return orccab;
 	}
 
-	@JmsListener(destination = "WBCCAD-PRDORC")
+	@JmsListener(destination = "WBCCAD-PRODUTO-EXPORTAR")
 	// @SendTo("wbccad-prdorc-dump")
-	@SendTo("IMPORT-MATERIAL")
+	@SendTo("MATERIAL-IMPORTAR")
 	public Prdorc prdorc(String codigo) {
-		System.out.println(String.format("\n Processing Prdorc %s", codigo));
+		System.out.println(String.format("\n EXPORTANDO ESTRUTURA DO PRODUTO [%s] PARA FILA MATERIAL-IMPORTAR", codigo));
 
 		Prdorc prdorc = prdorcRepository.findByProduto(codigo);
 		if (prdorc != null) {
@@ -219,7 +214,7 @@ public class OrcMatController {
 		return list;
 	}
 
-	@JmsListener(destination = "WBCCAD-ORCCAB-DUMP")
+	@JmsListener(destination = "WBCCAD-ORCAMENTO-IMPRIMIR")
 	public void receiveList(Orccab orccab) {
 
 		System.out
@@ -255,9 +250,9 @@ public class OrcMatController {
 
 	}
 
-	@JmsListener(destination = "WBCCAD-PRDORC-DUMP")
+	@JmsListener(destination = "WBCCAD-PRODUTO-IMPRIMIR-ESTRUTURA")
 	public void prdorcPrint(String codigo) {
-		System.out.println(String.format("\n Processing Prdorc %s", codigo));
+		System.out.println(String.format("\n PRODUTO: %s\n", codigo));
 
 		Prdorc prdorc = prdorcRepository.findByProduto(codigo);
 		if (prdorc != null) {
@@ -274,7 +269,7 @@ public class OrcMatController {
 			return;
 		}
 
-		System.out.println(String.format("%s %s %s [%s]", "  +",
+		System.out.println(String.format("%s %s %s [%s]\n", "  +",
 				produtopai.getProduto(), produtopai.getDescricao(),
 				produtopai.getCor_padrao()));
 		for (Prdest prdest : produtopai.getPrdest()) {
@@ -283,7 +278,7 @@ public class OrcMatController {
 	}
 
 	private void printPrdest(Prdest prdest, String tab) {
-		System.out.println(String.format("%s %s %s [%s] [%s pc] {%s}", tab,
+		System.out.println(String.format("%s %s %s [%s] [%s pc] {%s}\n", tab,
 				prdest.getPrdorc().getProduto(), prdest.getPrdorc()
 						.getDescricao(), prdest.getPrdorc().getCor_padrao(),
 				prdest.getPrdestQtde(), prdest.getPrdestPeso()));
@@ -295,7 +290,7 @@ public class OrcMatController {
 	private void printOrcDet(OrcItm itm, String tab) {
 		for (OrcDet orcdet : itm.getOrcdet()) {
 			System.out.println(String.format(
-					"%s %s %s [%s] [%.2f pc] [%.3f kg]", tab,
+					"%s %s %s [%s] [%.2f pc] [%.3f kg]\n", tab,
 					orcdet.getOrcdetCodigo(),
 					orcdet.getPrdorc().getDescricao(), orcdet.getOrcdetCor(),
 					orcdet.getOrcdetQtde(), orcdet.getOrcdetPeso()));

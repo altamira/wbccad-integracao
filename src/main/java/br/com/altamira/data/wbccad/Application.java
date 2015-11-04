@@ -45,7 +45,7 @@ public class Application {
 	@Bean
 	ConnectionFactory connectionFactory() {
 		return new CachingConnectionFactory(new ActiveMQConnectionFactory(
-				"tcp://127.0.0.1:61616"));
+				"tcp://192.168.0.211:61616"));
 	}
 
 	/*@Bean
