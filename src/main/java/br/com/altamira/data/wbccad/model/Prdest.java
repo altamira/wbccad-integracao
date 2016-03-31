@@ -276,5 +276,9 @@ public class Prdest implements Serializable {
 	public void setPrdorc(Prdorc prdorc) {
 		this.prdorc = prdorc;
 	}
+	
+	public String toString(String margin) {
+		return String.format("%sPRDEST: %s %s, qtd: %s\n%s", margin, this.getId().getPrdorccodigopai(), this.getId().getPrdorccodigofilho(), this.getPrdestQtde(), this.prdorc.toString(" " + margin));
+	}
 
 }

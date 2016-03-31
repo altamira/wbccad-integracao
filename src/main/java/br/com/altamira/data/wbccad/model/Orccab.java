@@ -1412,5 +1412,29 @@ public class Orccab implements Serializable {
 	public void setOrcItm(List<OrcItm> orcItm) {
 		this.orcItm = orcItm;
 	}
+	
+	@Override
+	public String toString() {
+		StringBuffer buf = new StringBuffer();
+		buf.append(String.format("ORCCAB: %s %s\n", this.getNumeroOrcamento().trim(), this.getOrccab_cliente_Nome().trim()));
+		String margin = " ";
+
+		buf.append(" +-----------------------------------------------------------------------------------------------+\n");
+		buf.append(" |                                          MATERIAIS                                            |\n");
+		buf.append(" +-----------------------------------------------------------------------------------------------+\n");
+		
+		for(OrcMat mat : this.orcMat) {
+			buf.append(mat.toString(margin));
+		}
+		
+		buf.append(" +-----------------------------------------------------------------------------------------------+\n");
+		buf.append(" |                                            ITEMS                                              |\n");
+		buf.append(" +-----------------------------------------------------------------------------------------------+\n");
+
+		for(OrcItm itm : this.orcItm) {
+			buf.append(itm.toString(margin));
+		}		
+		return buf.toString();		
+	}
 
 }

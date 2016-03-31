@@ -14,4 +14,6 @@ import br.com.altamira.data.wbccad.model.OrcMatPK;
 public interface OrcMatRepository extends CrudRepository<OrcMat, OrcMatPK> {
 
     List<OrcMat> findAllByIdNumeroOrcamento(String orcamento);
+    List<OrcMat> findAllByIdNumeroOrcamentoAndOrcMatGrupoAndOrcMatSubGrupo(String orcamento, Integer grupo, String subgrupo);
+
 }

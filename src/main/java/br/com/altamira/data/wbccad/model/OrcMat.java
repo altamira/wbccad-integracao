@@ -2,6 +2,7 @@ package br.com.altamira.data.wbccad.model;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -646,6 +647,21 @@ public class OrcMat implements Serializable {
 
 	public void setOrcDet(List<OrcDet> orcDet) {
 		this.orcDet = orcDet;
+	}
+	
+	public String toString(String margin) {
+		StringBuffer buf = new StringBuffer();
+
+		margin = " " + margin;
+		
+		buf.append(String.format("%sORCMAT: %s %s, qtd: %2f\n", margin, this.getOrcmatCodigo(), this.getOrcmatDescricao(), this.getOrcmatQtde()));
+		
+		buf.append(this.prdorc.toString(margin));
+		
+		for(OrcDet det : this.orcDet == null ? new ArrayList<OrcDet>() : this.orcDet) {
+			buf.append(det.toString(margin));
+		}
+		return buf.toString();
 	}
 
 }

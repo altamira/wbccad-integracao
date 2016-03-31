@@ -111,7 +111,7 @@ public class OrcItm implements Serializable {
 	private String orctxt;
 	
 	@Transient
-	private OrcMat orcMat;
+	private List<OrcMat> orcMat;
 	
 	@Transient
 	private List<OrcDet> orcdet;
@@ -359,11 +359,11 @@ public class OrcItm implements Serializable {
 		this.orctxt = orctxt;
 	}
 
-	public OrcMat getOrcMat() {
+	public List<OrcMat> getOrcMat() {
 		return orcMat;
 	}
 
-	public void setOrcMat(OrcMat orcMat) {
+	public void setOrcMat(List<OrcMat> orcMat) {
 		this.orcMat = orcMat;
 	}
 
@@ -373,6 +373,19 @@ public class OrcItm implements Serializable {
 
 	public void setOrcdet(List<OrcDet> orcdet) {
 		this.orcdet = orcdet;
+	}
+	
+	public String toString(String margin) {
+		StringBuffer buf = new StringBuffer();
+		
+		margin = " " + margin;
+		
+		buf.append(String.format("%sORCITM: %s %s\n", margin, this.getOrcitmItem(), this.getOrctxt() == null ? "" : this.getOrctxt().trim()));
+		
+		for(OrcDet det : this.orcdet) {
+			buf.append(det.toString(margin));
+		}
+		return buf.toString();
 	}
 
 }

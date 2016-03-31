@@ -499,5 +499,18 @@ public class Prdorc implements Serializable {
 	public void setPrdest(List<Prdest> prdest) {
 		this.prdest = prdest;
 	}
+	
+	public String toString(String margin) {
+		StringBuffer buf = new StringBuffer();
+		
+		margin = " " + margin;
+
+		buf.append(String.format("%sPRDORC: %s %s\n", margin, this.getProduto(), this.getDescricao()));
+		
+		for(Prdest prd : this.prdest) {
+			buf.append(prd.toString(" " + margin));
+		}
+		return buf.toString();
+	}
 
 }
