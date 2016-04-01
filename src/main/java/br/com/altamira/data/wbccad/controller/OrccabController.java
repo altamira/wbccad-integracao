@@ -1,7 +1,9 @@
 package br.com.altamira.data.wbccad.controller;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
@@ -24,7 +26,6 @@ import br.com.altamira.data.wbccad.repository.OrcitmRepository;
 import br.com.altamira.data.wbccad.repository.OrclstRepository;
 import br.com.altamira.data.wbccad.repository.PrdestRepository;
 import br.com.altamira.data.wbccad.repository.PrdorcRepository;
-
 
 @Controller
 public class OrccabController {
@@ -65,32 +66,66 @@ public class OrccabController {
 		
 		if (orclst != null) {
 
-			orccab = orccabRepository.findByNumeroOrcamento(orclst.getOrclstNumero().trim() + orclst.getOrclstRevisao().trim());
+			orccab = orccabRepository.findByNumeroOrcamento(orclst.getOrclstNumero().trim() + (orclst.getOrclstRevisao() == null ? "" : orclst.getOrclstRevisao().trim()));
 
 			if (orccab != null) {
 				
-				orccab.setOrcItm(orcitmRepository
-						.findAllByNumeroOrcamentoOrderByOrcitmItemAscOrcitmGrupoAscOrcitmSubgrupoAsc(orccab
-								.getNumeroOrcamento()));
+				Set<String> codigos = new HashSet<String>();
 				
-				for (OrcItm itm : orccab.getOrcItm()) {
-					itm.setOrcMat(orcMatRepository
-							.findAllByIdNumeroOrcamentoAndOrcMatGrupoAndOrcMatSubGrupo(
-									itm.getNumeroOrcamento(),
-									itm.getOrcitmGrupo(), itm.getOrcitmSubgrupo()));
+				orccab.setPrdOrc(new HashSet<Prdorc>());
+				
+				// Carrega previamente a lista de produtos deste orcamento
+				// isso melhora muito o tempo de acesso, pois evita que seja feitas muitas requisições no banco de dados 
+				// para buscar os dados do PrdOrc individualmente
+				List<Prdorc> prdorcList = prdorcRepository.listarPrdorc(numero);
+				
+				System.out.println(" +-----------------------------------------------------------------------------------------------+");
+				System.out.println(" |                           CARREGA A ARVORE DE PRODUTOS                                        |");
+				System.out.println(" +-----------------------------------------------------------------------------------------------+");
+				
+				for (Prdorc prdorc : prdorcList) {
+					
+					System.out.println(String.format("--> %s %s\n", prdorc.getProduto(), prdorc.getDescricao()));
+					
+					prdorc.setPrdest(Prdest(orccab, prdorc));
+
+					orccab.getPrdOrc().add(prdorc);
+
 				}
 					
+				System.out.println(" +-----------------------------------------------------------------------------------------------+");
+				System.out.println(" |                              FIM DA ARVORE DE PRODUTOS                                        |");
+				System.out.println(" +-----------------------------------------------------------------------------------------------+");
+				
 				orccab.setOrcMat(orcMatRepository.findAllByIdNumeroOrcamento(orccab
 						.getNumeroOrcamento()));
 				
 				for (OrcMat mat : orccab.getOrcMat()) {
+						
+					Optional<Prdorc> exist = orccab.getPrdOrc()
+							.stream()
+							.filter(i -> i.getProduto().trim().equals(mat.getOrcmatCodigoPai().trim()))
+							.findFirst();
 					
-					Prdorc prdorc = prdorcRepository.findByProduto(mat
-							.getOrcmatCodigoPai());
-					
-					prdorc.setPrdest(Prdest(prdorc));
-					mat.setPrdorc(prdorc);
+					if (exist.isPresent()) {
+						exist.get().setRef();
+						mat.setPrdorc(exist.get());
+					} else {
+						Prdorc prdorc = prdorcRepository.findByProduto(mat.getOrcmatCodigoPai().trim());
+						
+						orccab.setCount();
+
+						prdorc.setPrdest(Prdest(orccab, prdorc));
+
+						orccab.getPrdOrc().add(prdorc);
+						
+						mat.setPrdorc(prdorc);
+					}
 				}
+				
+				orccab.setOrcItm(orcitmRepository
+						.findAllByNumeroOrcamentoOrderByOrcitmItemAscOrcitmGrupoAscOrcitmSubgrupoAsc(orccab
+								.getNumeroOrcamento()));
 				
 				for (OrcItm itm : orccab.getOrcItm()) {
 					
@@ -111,11 +146,25 @@ public class OrccabController {
 					
 					for (OrcDet orcdet : itm.getOrcdet()) {
 
-						Prdorc prdorc = prdorcRepository.findByProduto(orcdet
-								.getOrcdetCodigoOri());
+						Optional<Prdorc> exist = orccab.getPrdOrc()
+								.stream()
+								.filter(i -> i.getProduto().trim().equals(orcdet.getOrcdetCodigoOri().trim()))
+								.findFirst();
 						
-						prdorc.setPrdest(Prdest(prdorc));
-						orcdet.setPrdorc(prdorc);
+						if (exist.isPresent()) {
+							exist.get().setRef();
+							orcdet.setPrdorc(exist.get());
+						} else {
+							Prdorc prdorc = prdorcRepository.findByProduto(orcdet.getOrcdetCodigoOri());
+							
+							orccab.setCount();
+							
+							prdorc.setPrdest(Prdest(orccab, prdorc));
+							
+							orccab.getPrdOrc().add(prdorc);
+							
+							orcdet.setPrdorc(prdorc);
+						}
 					}
 				}
 
@@ -135,7 +184,7 @@ public class OrccabController {
 		
 	}
 
-	public Prdorc prdorc(String codigo) {
+	/*public Prdorc prdorc(Orccab orccab, String codigo) {
 		System.out.println(String.format("\n EXPORTANDO ESTRUTURA DO PRODUTO [%s] PARA FILA MATERIAL-IMPORTAR", codigo));
 
 		Prdorc prdorc = prdorcRepository.findByProduto(codigo);
@@ -143,20 +192,59 @@ public class OrccabController {
 			prdorc.setPrdest(Prdest(prdorc));
 		}
 		return prdorc;
-	}
+	}*/
 
-	private List<Prdest> Prdest(Prdorc produtopai) {
-		List<Prdest> list = new ArrayList<Prdest>();
+	private List<Prdest> Prdest(Orccab orccab, Prdorc produtopai) {
+		List<Prdest> list = null;
 
-		list = prdestRepository.findAllByIdPrdorccodigopai(produtopai
-				.getProduto());
+		Prdorc prdorc = null;
+		
+		Optional<Prdorc> existPai = orccab.getPrdOrc()
+				.stream()
+				.filter(i -> i.getProduto().trim().equals(produtopai.getProduto().trim()))
+				.findFirst();
+		
+		if (existPai.isPresent()) {
+			System.out.println(String.format(" %s: Encontrou produto pai: %s\n%s", existPai.get().getProduto(), existPai.get().getDescricao(), existPai.get().toString(" ")));
+			existPai.get().setRef();
+			list = existPai.get().getPrdest();
+		} else {
+			list = prdestRepository.findAllByIdPrdorccodigopai(produtopai
+					.getProduto());
 
-		for (Prdest prdest : list) {
-			Prdorc produtofilho = prdorcRepository.findByProduto(prdest.getId()
-					.getPrdorccodigofilho());
-			produtofilho.setPrdest(Prdest(produtofilho));
-			prdest.setPrdorc(produtofilho);
+			System.out.println(String.format(" %s: Carregando estrutura do produto pai: %s, encontrado: %d\n", produtopai.getProduto(), produtopai.getDescricao(), list.size()));
+
+			for (Prdest prdest : list) {
+				
+				Optional<Prdorc> exist = orccab.getPrdOrc()
+						.stream()
+						.filter(i -> i.getProduto().trim().equals(prdest.getId()
+								.getPrdorccodigofilho().trim()))
+						.findFirst();
+				
+				if (exist.isPresent()) {
+					System.out.println(String.format(" %s: Encontrou produto filho: %s\n", exist.get().getProduto(), exist.get().getDescricao()));
+					exist.get().setRef();
+					prdorc = exist.get();
+				} else {
+					prdorc = prdorcRepository.findByProduto(prdest.getId()
+							.getPrdorccodigofilho());
+					
+					System.out.println(String.format(" %s: Carregando produto filho: %s %s\n", prdest.getId().getPrdorccodigopai(), prdorc.getProduto(), prdorc.getDescricao()));
+
+					orccab.setCount();
+					
+					prdorc.setPrdest(Prdest(orccab, prdorc));
+					
+					orccab.getPrdOrc().add(prdorc);
+
+				}
+
+				prdest.setPrdorc(prdorc);
+			}
 		}
+
+
 		return list;
 	}
 

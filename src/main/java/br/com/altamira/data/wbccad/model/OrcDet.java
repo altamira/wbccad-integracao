@@ -211,7 +211,7 @@ public class OrcDet implements Serializable {
 
 	@OneToOne
 	@Transient
-	private Prdorc prdorc;
+	private Prdorc prdorc = null;
 	
 	public OrcDet() {
 	}

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,8 +13,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-
-import org.springframework.data.annotation.Transient;
+import javax.persistence.Transient;
 
 
 /**
@@ -386,11 +386,18 @@ public class Orccab implements Serializable {
 
 	@OneToMany
 	@Transient
+	private Set<Prdorc> prdOrc;
+	
+	@OneToMany
+	@Transient
 	private List<OrcMat> orcMat;
 	
 	@OneToMany
 	@Transient
 	private List<OrcItm> orcItm;
+	
+	@Transient 
+	private int count = 0;
 	
 	public Orccab() {
 	}
@@ -1395,6 +1402,14 @@ public class Orccab implements Serializable {
 		this.tipoVenda = tipoVenda;
 	}
 
+	public Set<Prdorc> getPrdOrc() {
+		return prdOrc;
+	}
+
+	public void setPrdOrc(Set<Prdorc> prdOrc) {
+		this.prdOrc = prdOrc;
+	}
+
 	public List<OrcMat> getOrcMat() {
 		return orcMat;
 	}
@@ -1434,7 +1449,28 @@ public class Orccab implements Serializable {
 		for(OrcItm itm : this.orcItm) {
 			buf.append(itm.toString(margin));
 		}		
+
+		buf.append(" +-----------------------------------------------------------------------------------------------+\n");
+		buf.append(" |                                           PRODUTOS                                            |\n");
+		buf.append(" +-----------------------------------------------------------------------------------------------+\n");
+
+		for(Prdorc prdorc : this.prdOrc) {
+			buf.append(prdorc.toString(margin));
+		}		
+		
+		buf.append(String.format("\n Acessos na tabela PrdOrc: %d\n Quant. Produtos unicos carregados: %d\n Quant. Materiais: %d\n Quant. Items: %d", 
+				this.getCount(), this.prdOrc.size(), this.orcMat.size(), this.orcItm.size()));
+
 		return buf.toString();		
 	}
 
+	public int getCount() {
+		return count;
+	}
+
+	public void setCount() {
+		this.count++;
+	}
+
+	
 }

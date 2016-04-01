@@ -148,6 +148,9 @@ public class Prdorc implements Serializable {
 
 	@Column(name="utilizar_medidas_originais")
 	private Boolean utilizarMedidasOriginais;
+	
+	@Transient
+	private int ref;
 
 	@Transient
 	@OneToMany
@@ -505,12 +508,20 @@ public class Prdorc implements Serializable {
 		
 		margin = " " + margin;
 
-		buf.append(String.format("%sPRDORC: %s %s\n", margin, this.getProduto(), this.getDescricao()));
+		buf.append(String.format("%sPRDORC: %s [InstanceID: %s, Ref.Count: %d] %s\n", margin, this.getProduto(), this, this.getRef(), this.getDescricao().trim()));
 		
 		for(Prdest prd : this.prdest) {
 			buf.append(prd.toString(" " + margin));
 		}
 		return buf.toString();
+	}
+
+	public int getRef() {
+		return this.ref;
+	}
+
+	public void setRef() {
+		this.ref++;
 	}
 
 }
