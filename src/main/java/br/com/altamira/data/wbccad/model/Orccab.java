@@ -1431,7 +1431,7 @@ public class Orccab implements Serializable {
 	@Override
 	public String toString() {
 		StringBuffer buf = new StringBuffer();
-		buf.append(String.format("ORCCAB: %s %s\n", this.getNumeroOrcamento().trim(), this.getOrccab_cliente_Nome().trim()));
+		buf.append(String.format("ORCCAB: %s %s\n", this.getNumeroOrcamento().trim(), this.getOrccab_cliente_Nome() == null ? "" : this.getOrccab_cliente_Nome().trim()));
 		String margin = " ";
 
 		buf.append(" +-----------------------------------------------------------------------------------------------+\n");

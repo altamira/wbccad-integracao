@@ -200,11 +200,11 @@ public class Prdorc implements Serializable {
 	}
 
 	public String getDescricao() {
-		return this.descricao;
+		return this.descricao.trim().toUpperCase();
 	}
 
 	public void setDescricao(String descricao) {
-		this.descricao = descricao;
+		this.descricao = descricao.trim().toUpperCase();
 	}
 
 	public String getFamilia() {
@@ -456,11 +456,11 @@ public class Prdorc implements Serializable {
 	}
 
 	public String getProduto() {
-		return this.produto;
+		return this.produto.trim().toUpperCase();
 	}
 
 	public void setProduto(String produto) {
-		this.produto = produto;
+		this.produto = produto.trim().toUpperCase();
 	}
 
 	public String getSituacao() {
@@ -501,6 +501,11 @@ public class Prdorc implements Serializable {
 
 	public void setPrdest(List<Prdest> prdest) {
 		this.prdest = prdest;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("%s %s", this.getProduto(), this.getDescricao());
 	}
 	
 	public String toString(String margin) {

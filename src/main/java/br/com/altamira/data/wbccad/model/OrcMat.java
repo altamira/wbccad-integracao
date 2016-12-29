@@ -346,19 +346,19 @@ public class OrcMat implements Serializable {
 	}
 
 	public String getOrcmatCodigo() {
-		return this.orcmatCodigo;
+		return this.orcmatCodigo.trim().toUpperCase();
 	}
 
 	public void setOrcmatCodigo(String orcmatCodigo) {
-		this.orcmatCodigo = orcmatCodigo;
+		this.orcmatCodigo = orcmatCodigo.trim().toUpperCase();
 	}
 
 	public String getOrcmatCodigoPai() {
-		return this.orcmatCodigoPai;
+		return this.orcmatCodigoPai.trim().toUpperCase();
 	}
 
 	public void setOrcmatCodigoPai(String orcmatCodigoPai) {
-		this.orcmatCodigoPai = orcmatCodigoPai;
+		this.orcmatCodigoPai = orcmatCodigoPai.trim().toUpperCase();
 	}
 
 	public String getOrcmatCor() {
